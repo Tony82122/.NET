@@ -1,67 +1,86 @@
 ﻿@page "/weather"
+@using ApiContracts.DTOs
+@using BlazorApp1.HttpServices
 @attribute [StreamRendering]
+@inject IPostService PostService
 
-<PageTitle>Weather</PageTitle>
+<PageTitle>Trending Posts</PageTitle>
 
-<h1>Weather</h1>
+<h1>Trending Posts</h1>
 
-<p>This component demonstrates showing data.</p>
-
-@if (forecasts == null)
+@if (_loading)
 {
-    <p>
-        <em>Loading...</em>
-    </p>
+    <p>Loading...</p>
+}
+else if (_error != null)
+{
+    <div class="alert alert-danger" role="alert">
+        @_error
+    </div>
+}
+else if (_posts == null || !_posts.Any())
+{
+    <p>No posts found.</p>
 }
 else
 {
-    <table class="table">
-        <thead>
-        <tr>
-            <th>Date</th>
-            <th>Temp. (C)</th>
-            <th>Temp. (F)</th>
-            <th>Summary</th>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach (var forecast in forecasts)
+    <div class="row">
+        @foreach (var post in _posts)
         {
-            <tr>
-                <td>@forecast.Date.ToShortDateString()</td>
-                <td>@forecast.TemperatureC</td>
-                <td>@forecast.TemperatureF</td>
-                <td>@forecast.Summary</td>
-            </tr>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@post.Title</h5>
+                        <p class="card-text">@post.Content</p>
+                        <p class="card-text"><small class="text-muted">Created at: @post.CreatedAt.ToString("g")</small></p>
+                        <p class="card-text">
+                            <span class="badge bg-success">Upvotes: @post.UpVotes</span>
+                            <span class="badge bg-danger">Downvotes: @post.DownVotes</span>
+                        </p>
+                        <p class="card-text"><small class="text-muted">User ID: @post.UserId</small></p>
+                        @if (post.Comments != null && post.Comments.Any())
+                        {
+                            <h6>Comments:</h6>
+                            <ul class="list-group list-group-flush">
+                                @foreach (var comment in post.Comments.Take(3))
+                                {
+                                    <li class="list-group-item">
+                                        <p>@comment.TextContent</p>
+                                        <small class="text-muted">By User: @comment.UserId at @comment.CreatedAt.ToString("g")</small>
+                                    </li>
+                                }
+                            </ul>
+                            @if (post.Comments.Count > 3)
+                            {
+                                <p class="mt-2"><small>And @(post.Comments.Count - 3) more comments...</small></p>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
         }
-        </tbody>
-    </table>
+    </div>
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private List<postDTO> _posts;
+    private bool _loading = true;
+    private string _error;
 
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        try
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            _posts = await PostService.GetPostsAsync();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Error loading posts: {ex.Message}";
+            Console.WriteLine(_error);
+        }
+        finally
+        {
+            _loading = false;
+        }
     }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
-
 }
