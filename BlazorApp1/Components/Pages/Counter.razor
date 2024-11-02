@@ -1,20 +1,47 @@
 ﻿@page "/counter"
 @rendermode InteractiveServer
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Login </PageTitle>
 
-<h1>Counter</h1>
+<h1>Login</h1>
 
-<p role="status">Current count: @currentCount</p>
+<div class="form-group">
+    <label for="username">Username:</label>
+    <input type="text" class="form-control" id="username" @bind="username"/>
+</div>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<div class="form-group">
+    <label for="password">Password:</label>
+    <input type="password" class="form-control" id="password" @bind="password"/>
+</div>
+
+<button class="btn btn-primary" @onclick="Login">LOGIN</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <p class="mt-3">@message</p>
+}
 
 @code {
-    private int currentCount = 0;
+    private string username = "";
+    private string password = "";
+    private string message = "";
 
-    private void IncrementCount()
+    private void Login()
     {
-        currentCount++;
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            message = "Please enter both username and password.";
+        }
+        else
+        {
+            // Here you would typically call a service to handle the login
+            message = $"Login attempt for user: {username}";
+            // Reset fields after login attempt
+            username = "";
+            password = "";
+        }
     }
 
 }
+

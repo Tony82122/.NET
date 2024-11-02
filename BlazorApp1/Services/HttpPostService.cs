@@ -40,4 +40,21 @@ public class HttpPostService : IPostService
         var posts = await _client.GetFromJsonAsync<List<PostDTO>>("api/posts");
         return posts ?? new List<PostDTO>();
     }
+
+    public static async Task<List<PostDTO>> GetRecentPostsAsync(int userId)
+    {
+        return new List<PostDTO>()
+        { 
+            new PostDTO { Title = "The game last night", Body = "I didnt like the way England play so terrible in tournaments", UserId = "1267" },
+        new PostDTO() { Title = "AFTV", Body = "He has to go blud!", UserId = "1075" },
+        new PostDTO() { Title = "Football talk", Body = "When will Arsenal win the Champions league??", UserId = "2234" },
+        new PostDTO() { Title = "Election results", Body = "How many votes did Boris get??", UserId = "1568" },
+        new PostDTO() { Title = "Climate change", Body = "We need to act now!!", UserId = "3321" },
+        new PostDTO() { Title = "Coronavirus", Body = "It's a pandemic!!", UserId = "4456" },
+        new PostDTO() { Title = "Music trends", Body = "Why is Taylor Swift a thing??", UserId = "5567" }
+            
+        };
+    }
+    
+    
 }

@@ -1,10 +1,41 @@
 ﻿@page "/"
+@using ApiContracts.DTOs
+@using BlazorApp1.HttpServices
 
 
 
 <PageTitle>Home</PageTitle>
 
 <h1>Some sort of Reddit App</h1>
+
+<p> Latest posts</p>
+
+@if (posts == null)
+{
+<p>Loading...</p>
+}
+else
+{
+<div class="list-group">
+    @foreach (var post in posts)
+    {
+    <div class="list-group-item">
+        <h5 class="mb-1">@post.Title</h5>
+        <p class="mb-1">@post.Body</p>
+        <small>Posted by User @post.UserId</small>
+    </div>
+    }
+</div>
+}
+
+@code {
+private List<PostDTO> posts;
+
+protected override async Task OnInitializedAsync()
+{
+posts = await HttpPostService.GetRecentPostsAsync(0); // We're passing 0 as userId since it's not used in the current implementation
+}
+}
 
 
 

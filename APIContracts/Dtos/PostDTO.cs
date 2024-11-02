@@ -8,5 +8,6 @@ public class PostDTO
     public string? UserId { get; set; }
     public int? UpVotes { get; set; }
     public int? DownVotes { get; set; }
+    public string? Body { get; set; }
     public List<CommentDTO> Comments { get; set; } = new List<CommentDTO>(); 
 }
