@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -9,42 +10,45 @@ namespace BlazorApp1.HttpServices;
 public class HttpCommentService : ICommentService
 {
     private readonly HttpClient _client;
-
+    
     public HttpCommentService(HttpClient client)
     {
         _client = client;
-    }
-
-    public async Task<CommentDTO> AddCommentAsync(int postId, CommentDTO comment)
-    {
-        var response = await _client.PostAsJsonAsync($"api/posts/{postId}/comments", comment);
-        response.EnsureSuccessStatusCode();
-
-        return await response.Content.ReadFromJsonAsync<CommentDTO>() ??
-               throw new InvalidOperationException("Failed to retrieve the created comment.");
-    }
-
-    public async Task<CommentDTO> GetCommentAsync(int postId, int commentId)
-    {
-        return await _client.GetFromJsonAsync<CommentDTO>($"api/posts/{postId}/comments/{commentId}") ??
-               throw new InvalidOperationException("Failed to retrieve the comment.");
-    }
-
-    public async Task UpdateCommentAsync(int postId, int commentId, CommentDTO request)
-    {
-        var response = await _client.PutAsJsonAsync($"api/posts/{postId}/comments/{commentId}", request);
-        response.EnsureSuccessStatusCode();
-    }
-
-    public async Task DeleteCommentAsync(int postId, int commentId)
-    {
-        var response = await _client.DeleteAsync($"api/posts/{postId}/comments/{commentId}");
-        response.EnsureSuccessStatusCode();
+        _client.BaseAddress = new Uri("https://localhost:5001/");
     }
 
     public async Task<List<CommentDTO>> GetCommentsByPostIdAsync(int postId)
     {
-        var comments = await _client.GetFromJsonAsync<List<CommentDTO>>($"api/posts/{postId}/comments");
-        return comments ?? new List<CommentDTO>();
+        var response = await _client.GetAsync($"api/comments?postId={postId}");
+        await EnsureSuccessStatusCodeAsync(response, $"retrieve comments for post ID {postId}");
+        return await response.Content.ReadFromJsonAsync<List<CommentDTO>>() ?? new List<CommentDTO>();
+    }
+
+    public async Task<CommentDTO> AddCommentAsync(int postId, CommentDTO comment)
+    {
+        var response = await _client.PostAsJsonAsync($"api/comments?postId={postId}", comment);
+        await EnsureSuccessStatusCodeAsync(response, $"add comment to post ID {postId}");
+        return await response.Content.ReadFromJsonAsync<CommentDTO>() ?? throw new InvalidOperationException("Failed to deserialize the response");
+    }
+
+    public async Task UpdateCommentAsync(int commentId, CommentDTO comment)
+    {
+        var response = await _client.PutAsJsonAsync($"api/comments/{commentId}", comment);
+        await EnsureSuccessStatusCodeAsync(response, $"update comment ID {commentId}");
+    }
+
+    public async Task DeleteCommentAsync(int commentId)
+    {
+        var response = await _client.DeleteAsync($"api/comments/{commentId}");
+        await EnsureSuccessStatusCodeAsync(response, $"delete comment ID {commentId}");
+    }
+
+    private async Task EnsureSuccessStatusCodeAsync(HttpResponseMessage response, string operation)
+    {
+        if (!response.IsSuccessStatusCode)
+        {
+            var content = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException($"Failed to {operation}. Status code: {response.StatusCode}, Content: {content}");
+        }
     }
 }

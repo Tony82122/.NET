@@ -35,6 +35,23 @@ public class HttpPostService : IPostService
         response.EnsureSuccessStatusCode();
     }
 
+    Task<List<PostDTO>> IPostService.GetRecentPostsAsync(int userId)
+    {
+        return GetRecentPostsAsync(userId);
+    }
+
+    public Task<List<PostDTO>> GetPopularPostsAsync(int userId)
+    {
+        return GetPopularPostsAsync(userId, 10, 5);
+        
+    }
+
+    public async Task <List<PostDTO>> GetPopularPostsAsync(int userId, int upVotes, int downVotes) 
+    {
+        var posts = await _client.GetFromJsonAsync<List<PostDTO>>($"api/users/{userId}/posts?upvotes={upVotes}&downvotes={downVotes}");
+        return posts?? new List<PostDTO>();
+    }
+
     public async Task<List<PostDTO>> GetPostsAsync()
     {
         var posts = await _client.GetFromJsonAsync<List<PostDTO>>("api/posts");
@@ -54,7 +71,10 @@ public class HttpPostService : IPostService
         new PostDTO() { Title = "Music trends", Body = "Why is Taylor Swift a thing??", UserId = "5567" }
             
         };
+        await Task.Delay(1000); 
     }
+
+   
     
     
 }
