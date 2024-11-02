@@ -15,15 +15,15 @@ public class HttpPostService : IPostService
         _client = client;
     }
 
-    public async Task<PostDTO> AddPostAsync(int userId, PostDTO post)
+    public async Task<postDTO> AddPostAsync(int userId, postDTO post)
     {
         var response = await _client.PostAsJsonAsync($"api/users/{userId}/posts", post);
         response.EnsureSuccessStatusCode();
-        return await _client.GetFromJsonAsync<PostDTO>(
+        return await _client.GetFromJsonAsync<postDTO>(
             $"api/users/{userId}/posts/{response.Headers.Location.Segments.Last()}") ?? throw new InvalidOperationException();
     }
 
-    public async Task UpdatePostAsync(int userId, int postId, PostDTO post)
+    public async Task UpdatePostAsync(int userId, int postId, postDTO post)
     {
         var response = await _client.PutAsJsonAsync($"api/users/{userId}/posts/{postId}", post);
         response.EnsureSuccessStatusCode();
@@ -35,40 +35,47 @@ public class HttpPostService : IPostService
         response.EnsureSuccessStatusCode();
     }
 
-    Task<List<PostDTO>> IPostService.GetRecentPostsAsync(int userId)
+    Task<List<postDTO>> IPostService.GetRecentPostsAsync(int userId, DateTime startDate,DateTime endDate)
     {
         return GetRecentPostsAsync(userId);
     }
 
-    public Task<List<PostDTO>> GetPopularPostsAsync(int userId)
+    public Task<List<postDTO>> GetPopularPostsAsync(int userId)
     {
         return GetPopularPostsAsync(userId, 10, 5);
         
     }
 
-    public async Task <List<PostDTO>> GetPopularPostsAsync(int userId, int upVotes, int downVotes) 
+    public  async Task<List<postDTO>> GetTopPostsAsync(int userId, DateTime startDate, DateTime endDate)
     {
-        var posts = await _client.GetFromJsonAsync<List<PostDTO>>($"api/users/{userId}/posts?upvotes={upVotes}&downvotes={downVotes}");
-        return posts?? new List<PostDTO>();
+        var posts = await _client.GetFromJsonAsync<List<postDTO>>(
+            $"api/users/{userId}/posts?startdate={startDate.ToString("yyyy-MM-dd")}&enddate   ");   
+        return posts?? new List<postDTO>();
     }
 
-    public async Task<List<PostDTO>> GetPostsAsync()
+    public async Task <List<postDTO>> GetPopularPostsAsync(int userId, int upVotes, int downVotes) 
     {
-        var posts = await _client.GetFromJsonAsync<List<PostDTO>>("api/posts");
-        return posts ?? new List<PostDTO>();
+        var posts = await _client.GetFromJsonAsync<List<postDTO>>($"api/users/{userId}/posts?upvotes={upVotes}&downvotes={downVotes}");
+        return posts?? new List<postDTO>();
     }
 
-    public static async Task<List<PostDTO>> GetRecentPostsAsync(int userId)
+    public async Task<List<postDTO>> GetPostsAsync()
     {
-        return new List<PostDTO>()
+        var posts = await _client.GetFromJsonAsync<List<postDTO>>("api/posts");
+        return posts ?? new List<postDTO>();
+    }
+
+    public static async Task<List<postDTO>> GetRecentPostsAsync(int userId)
+    {
+        return new List<postDTO>()
         { 
-            new PostDTO { Title = "The game last night", Body = "I didnt like the way England play so terrible in tournaments", UserId = "1267" },
-        new PostDTO() { Title = "AFTV", Body = "He has to go blud!", UserId = "1075" },
-        new PostDTO() { Title = "Football talk", Body = "When will Arsenal win the Champions league??", UserId = "2234" },
-        new PostDTO() { Title = "Election results", Body = "How many votes did Boris get??", UserId = "1568" },
-        new PostDTO() { Title = "Climate change", Body = "We need to act now!!", UserId = "3321" },
-        new PostDTO() { Title = "Coronavirus", Body = "It's a pandemic!!", UserId = "4456" },
-        new PostDTO() { Title = "Music trends", Body = "Why is Taylor Swift a thing??", UserId = "5567" }
+            new postDTO { Title = "The game last night", Body = "I dont like the way England play so terrible in tournaments", UserId = "1267" },
+        new postDTO() { Title = "AFTV", Body = "He has to go blud!", UserId = "1075" },
+        new postDTO() { Title = "Football talk", Body = "When will Arsenal win the Champions league??", UserId = "2234" },
+        new postDTO() { Title = "Election results", Body = "How many votes did Boris get??", UserId = "1568" },
+        new postDTO() { Title = "Climate change", Body = "We need to act now!!", UserId = "3321" },
+        new postDTO() { Title = "Coronavirus", Body = "It's a pandemic!!", UserId = "4456" },
+        new postDTO() { Title = "Music trends", Body = "Why is Taylor Swift a thing??", UserId = "5567" }
             
         };
         await Task.Delay(1000); 

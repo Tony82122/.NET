@@ -11,5 +11,4 @@ public class CommentDTO
     public int Downvotes { get; set; } = 0;
     public string? TextContent { get; set; }
     
-    public string? Content { get; set; }
 }

@@ -30,10 +30,11 @@ public class PostController : Controller
         if (post == null)
             return NotFound(); // 404 Not Found if the post doesn't exist
         return Ok(post);
+        
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatePost([FromBody] PostDTO postDto)
+    public async Task<IActionResult> CreatePost([FromBody] postDTO postDto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState); // 400 Bad Request
@@ -45,7 +46,11 @@ public class PostController : Controller
             Id = 0,
             UserId = postDto.UserId,
             Upvotes = 0,
-            Downvotes = 0
+            Downvotes = 0,
+            Body = postDto.Body,
+            
+           
+            
         };
 
         await _postRepository.AddAsync(newPost);
@@ -55,15 +60,17 @@ public class PostController : Controller
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdatePost(int id,
-        [FromBody] PostDTO postDto)
+        [FromBody] postDTO postDto)
     {
         var postToUpdate = await _postRepository.GetSingleAsync(id);
 
         postToUpdate.Title = postDto.Title;
         postToUpdate.Content = postDto.Content;
         postToUpdate.UserId = postDto.UserId;
+        
+        
         await _postRepository.UpdateAsync(postToUpdate);
-        return NoContent();
+        return Ok();
     }
 
     [HttpDelete("{id}")]
@@ -71,8 +78,10 @@ public class PostController : Controller
     {
         var post = await _postRepository.GetSingleAsync(id);
         if (post == null) return NotFound();
+        
 
         await _postRepository.DeleteAsync(id);
         return NoContent();
+        
     }
 }

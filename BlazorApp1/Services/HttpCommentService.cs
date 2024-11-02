@@ -29,6 +29,7 @@ public class HttpCommentService : ICommentService
         var response = await _client.PostAsJsonAsync($"api/comments?postId={postId}", comment);
         await EnsureSuccessStatusCodeAsync(response, $"add comment to post ID {postId}");
         return await response.Content.ReadFromJsonAsync<CommentDTO>() ?? throw new InvalidOperationException("Failed to deserialize the response");
+        
     }
 
     public async Task UpdateCommentAsync(int commentId, CommentDTO comment)

@@ -27,7 +27,20 @@ public class CommentController : Controller
         var comment = await _commentRepository.GetSingleAsync(id);
         if (comment == null)
             return NotFound(); // 404 Not Found if the comment doesn't exist
-        return Ok(comment);
+      
+
+        var commentDto = new CommentDTO
+        {
+            Id = comment.Id,
+            UserId = comment.UserId,
+            PostId = comment.PostId,
+            TextContent = comment.TextContent,
+            CreatedAt = comment.CreatedAt,
+            Upvotes = comment.Upvotes,
+            Downvotes = comment.Downvotes, 
+            
+        };
+        return Ok(commentDto);
     }
     
     [HttpPost]
@@ -37,6 +50,7 @@ public class CommentController : Controller
             return BadRequest(ModelState); // 400 Bad Request
         var comment = new Comment
         {
+            Id = commentDTO.Id,
             UserId = commentDTO.UserId,
             PostId = commentDTO.PostId,
             TextContent = commentDTO.TextContent,
@@ -69,5 +83,7 @@ public class CommentController : Controller
         await _commentRepository.DeleteAsync(id);
         return NoContent();
     }
+    
+    
 
 }

@@ -7,12 +7,14 @@ namespace BlazorApp1.HttpServices;
 
 public interface IPostService
 {
-    Task<List<PostDTO>> GetPostsAsync();
-    Task<PostDTO> AddPostAsync(int userId, PostDTO post);
-    Task UpdatePostAsync(int userId, int postId, PostDTO post);
+    Task<List<postDTO>> GetPostsAsync();
+    Task<postDTO> AddPostAsync(int userId, postDTO post);
+    Task UpdatePostAsync(int userId, int postId, postDTO post);
     Task DeletePostAsync(int userId, int postId);
-    Task<List<PostDTO>> GetRecentPostsAsync(int userId);    
-    Task<List <PostDTO>> GetPopularPostsAsync(int userId); 
+    Task<List<postDTO>> GetRecentPostsAsync(int userId, DateTime startDate, DateTime endDate);    
+    Task<List <postDTO>> GetPopularPostsAsync(int userId); 
+    Task<List<postDTO>> GetTopPostsAsync(int userId, DateTime startDate, DateTime endDate);
+    
     
     
 }
