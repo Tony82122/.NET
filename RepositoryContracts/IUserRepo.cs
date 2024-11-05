@@ -11,4 +11,6 @@ public interface IUserRepo
     
     IQueryable<User> GetAll();
     Task<IQueryable<User>> GetManyAsync();
+    //Task<UserDTO> GetUserByUsernameAsync(string username);
+    Task <User>GetUserByUsernameAsync(string requestUserName);
 }

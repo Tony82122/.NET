@@ -1,5 +1,8 @@
+using BlazorApp1.Auth;
 using BlazorApp1.Components;
+using BlazorApp1.HttpEntities;
 using BlazorApp1.HttpServices;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +14,8 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https:/
 builder.Services.AddScoped<IUserService, HttpUserService>();
 builder.Services.AddScoped<IPostService, HttpPostService>();
 builder.Services.AddScoped<ICommentService, HttpCommentService>();
+builder.Services.AddScoped<IAuthProvider, AuthProvider>();
+
 
 
 var app = builder.Build();
@@ -32,3 +37,4 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+

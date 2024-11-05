@@ -2,30 +2,25 @@
 @using ApiContracts.DTOs
 @using BlazorApp1.HttpServices
 @inject IPostService PostService
+@inject NavigationManager NavMgr
 
 <PageTitle>Home</PageTitle>
 
-<h1>Some sort of Reddit App</h1>
+ <h1>Some sort of Reddit App</h1>
 
-<p>Latest posts</p>
 
-@if (posts == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <div class="list-group">
-        @foreach (var post in posts)
-        {
-            <div class="list-group-item">
-                <h5 class="mb-1">@post.Title</h5>
-                <p class="mb-1">@post.Content</p>
-                <small>Posted by User @post.UserId</small>
-            </div>
-        }
-    </div>
-}
+<AuthorizeView>
+    <Authorized>
+        <h3>Hello, @context.User.Identity.Name</h3>
+    </Authorized>
+    <NotAuthorized>
+        <p>You are not logged in fam!</p>
+        <button @onclick='() => NavMgr.NavigateTo("/Counter")'>Go to login</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+<p>Here you can browse "interesting" posts.</p>
+
 
 @code {
     private List<postDTO> posts;
@@ -43,4 +38,5 @@ else
             posts = new List<postDTO>(); // Initialize to empty list on error
         }
     }
+
 }
