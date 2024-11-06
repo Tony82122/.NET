@@ -12,6 +12,11 @@ public class AuthProvider : AuthenticationStateProvider, IAuthProvider
 {
     private readonly HttpClient httpClient;
     private readonly IJSRuntime jsRuntime;
+    private const string DummyUsername = "Hello";
+    private const string DummyPassword = "Moto";
+    private const string StorageKey = "currentUser";
+
+    private AuthenticationState? _cachedAuthState;
 
     public AuthProvider(HttpClient httpClient, IJSRuntime jsRuntime)
     {
@@ -21,67 +26,80 @@ public class AuthProvider : AuthenticationStateProvider, IAuthProvider
 
     public async Task LoginAsync(string userName, string password)
     {
-        HttpResponseMessage response = await httpClient.PostAsJsonAsync(
-            "auth/login",
-            new LoginRequest(userName, password));
-
-        string content = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
+        if (userName == DummyUsername && password == DummyPassword)
         {
-            throw new Exception(content);
+            var userDto = new UserDto
+            {
+                Id = 1,
+                UserName = DummyUsername
+            };
+
+            string serialisedData = JsonSerializer.Serialize(userDto);
+            await jsRuntime.InvokeVoidAsync("localStorage.setItem", StorageKey, serialisedData);
+            
+            _cachedAuthState = await CreateAuthenticationStateAsync(userDto);
+            NotifyAuthenticationStateChanged(Task.FromResult(_cachedAuthState));
         }
-
-        UserDto userDto = JsonSerializer.Deserialize<UserDto>(content, new JsonSerializerOptions
+        else
         {
-            PropertyNameCaseInsensitive = true
-        })!;
-
-        string serialisedData = JsonSerializer.Serialize(userDto);
-        await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", serialisedData);
-
-        List<Claim> claims = new List<Claim>()
-        {
-            new Claim(ClaimTypes.Name, userDto.UserName),
-            new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
-        };
-        ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth");
-        ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
-
-        NotifyAuthenticationStateChanged(
-            Task.FromResult(new AuthenticationState(claimsPrincipal))
-        );
+            throw new Exception("Invalid username or password");
+        }
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        string userAsJson = await jsRuntime.InvokeAsync<string>("sessionStorage.getItem", "currentUser");
+        if (_cachedAuthState != null)
+        {
+            return _cachedAuthState;
+        }
 
-        if (string.IsNullOrEmpty(userAsJson))
+        try
+        {
+            var userAsJson = await jsRuntime.InvokeAsync<string>("localStorage.getItem", StorageKey);
+
+            if (string.IsNullOrEmpty(userAsJson))
+            {
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
+            var userDto = JsonSerializer.Deserialize<UserDto>(userAsJson);
+            if (userDto == null)
+            {
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
+            _cachedAuthState = await CreateAuthenticationStateAsync(userDto);
+            return _cachedAuthState;
+        }
+        catch (InvalidOperationException)
         {
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
+    }
 
-        UserDto userDto = JsonSerializer.Deserialize<UserDto>(userAsJson)!;
-        List<Claim> claims = new List<Claim>()
+    private async Task<AuthenticationState> CreateAuthenticationStateAsync(UserDto userDto)
+    {
+        var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, userDto.UserName),
             new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
         };
-        ClaimsIdentity identity = new ClaimsIdentity(claims, "apiauth");
-        ClaimsPrincipal claimsPrincipal = new ClaimsPrincipal(identity);
-        return new AuthenticationState(claimsPrincipal);
+
+        var identity = new ClaimsIdentity(claims, "apiauth");
+        var user = new ClaimsPrincipal(identity);
+
+        return new AuthenticationState(user);
     }
 
     public Task<AuthenticationState> GetAuthorizationStateAsync()
     {
         return GetAuthenticationStateAsync();
     }
-    
-    
 
     public async Task Logout()
     {
-        await jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "currentUser", "");
-        NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()))));
+        await jsRuntime.InvokeVoidAsync("localStorage.removeItem", StorageKey);
+        _cachedAuthState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        NotifyAuthenticationStateChanged(Task.FromResult(_cachedAuthState));
     }
 }

@@ -15,6 +15,7 @@ builder.Services.AddScoped<IUserService, HttpUserService>();
 builder.Services.AddScoped<IPostService, HttpPostService>();
 builder.Services.AddScoped<ICommentService, HttpCommentService>();
 builder.Services.AddScoped<IAuthProvider, AuthProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, AuthProvider>();
 
 
 

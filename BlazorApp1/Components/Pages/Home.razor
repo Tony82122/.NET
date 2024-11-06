@@ -1,42 +1,77 @@
 ﻿@page "/"
 @using ApiContracts.DTOs
 @using BlazorApp1.HttpServices
+@using BlazorApp1.Auth
+@using BlazorApp1.HttpEntities
 @inject IPostService PostService
 @inject NavigationManager NavMgr
+@inject IAuthProvider AuthProvider
 
 <PageTitle>Home</PageTitle>
 
- <h1>Some sort of Reddit App</h1>
-
+<h1>Some sort of Reddit App</h1>
 
 <AuthorizeView>
     <Authorized>
-        <h3>Hello, @context.User.Identity.Name</h3>
+       
+        <button @onclick="Logout">Logout</button>
+        
+        @if (posts != null && posts.Any())
+        {
+            <h2>Posts</h2>
+            @foreach (var post in posts)
+            {
+                <div class="post">
+                    <h3>@post.Title</h3>
+                    <p>@post.Body</p>
+                    <!-- Add more post details as needed -->
+                </div>
+            }
+        }
+        else
+        {
+            <p>Loading posts...</p>
+        }
     </Authorized>
     <NotAuthorized>
-        <p>You are not logged in fam!</p>
-        <button @onclick='() => NavMgr.NavigateTo("/Counter")'>Go to login</button>
+        <p>You need to log in to view posts fam!</p>
+        <button @onclick='() => NavMgr.NavigateTo("/login")'>Go to login</button>
     </NotAuthorized>
 </AuthorizeView>
-
-<p>Here you can browse "interesting" posts.</p>
-
-
 @code {
     private List<postDTO> posts;
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadPosts();
+    }
+
+    private async Task LoadPosts()
+    {
         try
         {
-            posts = await PostService.GetPostsAsync();
+            var authState = await AuthProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                posts = await PostService.GetPostsAsync();
+            }
+            else
+            {
+                posts = new List<postDTO>();
+            }
         }
         catch (Exception ex)
         {
-            // Handle or log the error
             Console.WriteLine($"Error fetching posts: {ex.Message}");
-            posts = new List<postDTO>(); // Initialize to empty list on error
+            posts = new List<postDTO>();
         }
     }
 
+    private async Task Logout()
+    {
+        await AuthProvider.Logout();
+        NavMgr.NavigateTo("/login");
+    }
 }
