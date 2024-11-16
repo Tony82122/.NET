@@ -48,28 +48,25 @@ public class CommentController : Controller
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState); // 400 Bad Request
-        var comment = new Comment
-        {
-            Id = commentDTO.Id,
-            UserId = commentDTO.UserId,
-            PostId = commentDTO.PostId,
-            TextContent = commentDTO.TextContent,
-            CreatedAt = commentDTO.CreatedAt,
-            Upvotes = commentDTO.Upvotes,
-            Downvotes = commentDTO.Downvotes,
-        };
 
-        await _commentRepository.AddAsync( comment);
+        var comment = Comment.Create(
+            commentDTO.UserId,
+            commentDTO.PostId,
+            commentDTO.Body,
+            commentDTO.TextContent
+        );
+
+        await _commentRepository.AddAsync(comment);
         return CreatedAtAction(nameof(GetCommentById), new { id = comment.Id }, comment);
     }
     
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateComment(int id, [FromBody] CommentDTO comment)
+    public async Task<IActionResult> UpdateComment(int id, [FromBody] CommentDTO commentDTO)
     {
         var commentToUpdate = await _commentRepository.GetSingleAsync(id);
         if (commentToUpdate == null) return NotFound();
 
-        commentToUpdate.TextContent= comment.TextContent;
+        commentToUpdate.UpdateContent(commentDTO.Body, commentDTO.TextContent);
         await _commentRepository.UpdateAsync(commentToUpdate);
         return NoContent();
     }

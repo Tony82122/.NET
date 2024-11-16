@@ -2,6 +2,8 @@
 using Entities;
 using EntityRepository;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebAPI.Controllers;
 
@@ -17,9 +19,9 @@ public class PostController : Controller
     }
 
     [HttpGet]
-    public IActionResult GetAllPosts()
+    public ActionResult<IEnumerable<Post>> GetAllPosts()
     {
-        var posts = _postRepository.GetManyAsync();
+        var posts = _postRepository.GetAll();
         return Ok(posts);
     }
 
@@ -30,45 +32,36 @@ public class PostController : Controller
         if (post == null)
             return NotFound(); // 404 Not Found if the post doesn't exist
         return Ok(post);
-        
     }
 
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] postDTO postDto)
     {
         if (!ModelState.IsValid)
-            return BadRequest(ModelState); // 400 Bad Request
+            return BadRequest(ModelState);
 
-        var newPost = new Post
-        {
-            Title = postDto.Title,
-            Content = postDto.Content,
-            Id = 0,
-            UserId = postDto.UserId,
-            Upvotes = 0,
-            Downvotes = 0,
-            Body = postDto.Body,
-            
-           
-            
-        };
+        var newPost = Post.Create(
+            title: postDto.Title ?? string.Empty,
+            body: postDto.Body,
+            userId: postDto.UserId.ToString(),
+            content: postDto.Content
+        );
 
         await _postRepository.AddAsync(newPost);
-        return CreatedAtAction(nameof(GetPostById), new { id = newPost.Id },
-            newPost);
+        return CreatedAtAction(nameof(GetPostById), new { id = newPost.Id }, newPost);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdatePost(int id,
-        [FromBody] postDTO postDto)
+    public async Task<IActionResult> UpdatePost(int id, [FromBody] postDTO postDto)
     {
         var postToUpdate = await _postRepository.GetSingleAsync(id);
+        if (postToUpdate == null)
+            return NotFound();
 
-        postToUpdate.Title = postDto.Title;
-        postToUpdate.Content = postDto.Content;
-        postToUpdate.UserId = postDto.UserId;
-        
-        
+        postToUpdate.UpdateTitle(postDto.Title ?? string.Empty);
+        postToUpdate.UpdateBody(postDto.Body);
+        postToUpdate.UpdateContent(postDto.Content);
+
         await _postRepository.UpdateAsync(postToUpdate);
         return Ok();
     }
@@ -78,10 +71,8 @@ public class PostController : Controller
     {
         var post = await _postRepository.GetSingleAsync(id);
         if (post == null) return NotFound();
-        
 
         await _postRepository.DeleteAsync(id);
         return NoContent();
-        
     }
 }

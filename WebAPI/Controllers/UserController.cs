@@ -44,7 +44,6 @@ public class UserController : Controller
             Email = userDto.Email,
             Password = userDto.Password,
             Joined = DateTime.Now,
-            Subscribes = new List<int>() // TODO: replace with actual subscribes list
         };
 
         await _userRepository.AddAsync(newUser);

@@ -12,6 +12,6 @@ public interface IPostRepo
     
     
     IQueryable<Post> GetAll();
-    IQueryable<Post> GetManyAsync();
+    IEnumerable<Post> GetManyAsync();
     
 }

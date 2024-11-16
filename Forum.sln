@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RepositoryContracts", "Repo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FileRepositories", "FileRepositories\FileRepositories.csproj", "{CE22E205-A07B-4E8B-970A-3F358FB3240A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EfcRepositories", "EfcRepositories\EfcRepositories.csproj", "{25150616-0A97-4772-868E-D1B3247946BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,7 @@ Global
 		{CE22E205-A07B-4E8B-970A-3F358FB3240A} = {2BCB2899-3586-4393-96AC-D1D85D94F398}
 		{907AA4E2-E69E-47A3-8F93-5433C3EED1A7} = {2BCB2899-3586-4393-96AC-D1D85D94F398}
 		{CD8A1D5B-FB36-4334-A3E1-7A548F89245C} = {2BCB2899-3586-4393-96AC-D1D85D94F398}
+		{25150616-0A97-4772-868E-D1B3247946BE} = {2BCB2899-3586-4393-96AC-D1D85D94F398}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{304016DD-15E4-4A1D-A9FD-5B1DBC53FAD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -63,5 +66,9 @@ Global
 		{CE22E205-A07B-4E8B-970A-3F358FB3240A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CE22E205-A07B-4E8B-970A-3F358FB3240A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CE22E205-A07B-4E8B-970A-3F358FB3240A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25150616-0A97-4772-868E-D1B3247946BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25150616-0A97-4772-868E-D1B3247946BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25150616-0A97-4772-868E-D1B3247946BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25150616-0A97-4772-868E-D1B3247946BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
