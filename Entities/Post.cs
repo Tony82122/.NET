@@ -9,7 +9,6 @@ public class Post
     {
         Title = string.Empty;
         UserId = string.Empty;
-        
     }
 
     [Key]
@@ -18,30 +17,32 @@ public class Post
 
     [Required]
     [StringLength(200)]
-    public string Title { get;  set; }
+    public string Title { get; set; }
 
     [StringLength(5000)]
-    public string? Body { get;  set; }
+    public string? Body { get; set; }
 
     [Required]
-    public string UserId { get;  set; }
+    public string UserId { get; set; }
 
     [Required]
-    public int Upvotes { get;  set; } = 0;
+    public int Upvotes { get; set; } = 0;
 
     [Required]
-    public int Downvotes { get;  set; } = 0;
+    public int Downvotes { get; set; } = 0;
 
     [StringLength(5000)]
-    public string? Content { get;  set; }
+    public string? Content { get; set; }
 
     [Required]
-    public DateTime CreatedAt { get;  set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    [ForeignKey("UserId")]
+    [ForeignKey("User")]
+    public int AuthorId { get; set; }
+
     public User? User { get; set; }
 
-    public ICollection<Comment>? Comments { get;  set; }
+    public ICollection<Comment>? Comments { get; set; }
 
     public static Post Create(string title, string? body, string userId, string? content)
     {
@@ -53,30 +54,5 @@ public class Post
             Content = content,
             CreatedAt = DateTime.UtcNow
         };
-    }
-
-    public void UpdateTitle(string newTitle)
-    {
-        Title = newTitle;
-    }
-
-    public void UpdateBody(string? newBody)
-    {
-        Body = newBody;
-    }
-
-    public void UpdateContent(string? newContent)
-    {
-        Content = newContent;
-    }
-
-    public void IncrementUpvotes()
-    {
-        Upvotes++;
-    }
-
-    public void IncrementDownvotes()
-    {
-        Downvotes++;
     }
 }

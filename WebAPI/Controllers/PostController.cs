@@ -39,14 +39,18 @@ public class PostController : Controller
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
-
+    
+        // Assuming there's a Create method in the Post class
         var newPost = Post.Create(
             title: postDto.Title ?? string.Empty,
             body: postDto.Body,
-            userId: postDto.UserId.ToString(),
+            userId: postDto.UserId,
             content: postDto.Content
         );
-
+    
+        // If AuthorId needs to be set separately and it's of type User
+        // newPost.AuthorId = await _userRepository.GetUserById(postDto.UserId);
+    
         await _postRepository.AddAsync(newPost);
         return CreatedAtAction(nameof(GetPostById), new { id = newPost.Id }, newPost);
     }
@@ -58,9 +62,9 @@ public class PostController : Controller
         if (postToUpdate == null)
             return NotFound();
 
-        postToUpdate.UpdateTitle(postDto.Title ?? string.Empty);
-        postToUpdate.UpdateBody(postDto.Body);
-        postToUpdate.UpdateContent(postDto.Content);
+        postToUpdate.Title = postDto.Title ?? string.Empty;
+        postToUpdate.Body = postDto.Body;
+        postToUpdate.Content = postDto.Content;
 
         await _postRepository.UpdateAsync(postToUpdate);
         return Ok();

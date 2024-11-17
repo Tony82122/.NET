@@ -1,5 +1,7 @@
 using EntityRepository;
 using FileRepositories;
+using Microsoft.EntityFrameworkCore;
+using AppContext = EfcRepositories.AppContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +15,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IUserRepo, UserFileRepository>();
 builder.Services.AddTransient<ICommentRepository, CommentFileRepository>();
 builder.Services.AddTransient<IPostRepo, PostFileRepository>();
+builder.Services.AddDbContext<AppContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
@@ -28,8 +33,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 
-
-
-
 app.Run();
-
