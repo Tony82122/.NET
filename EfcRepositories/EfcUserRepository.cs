@@ -4,36 +4,53 @@ using EntityRepository;
 namespace EfcRepositories;
 
 public class EfcUserRepository : IUserRepo
+
     
 {
-    public Task<User> AddAsync(User user)
+    private readonly AppContext _context;
+    
+    public EfcUserRepository(AppContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
+    }
+    public Task<int> AddAsync(User user)
+    {
+        _context.Users.Add(user);
+        return _context.SaveChangesAsync();
+        
+ 
+        
     }
 
     public Task UpdateAsync(User user)
     {
-        throw new NotImplementedException();
+        _context.Users.Update(user);
+        return _context.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var userToDelete = await _context.Users.FindAsync(id);
+        if (userToDelete!= null)
+        {
+            _context.Users.Remove(userToDelete);
+            await _context.SaveChangesAsync();
+        }
     }
 
-    public Task<User> GetSingleAsync(int id)
+    public async Task<User> GetSingleAsync(int id)
     {
-        throw new NotImplementedException();
+        return await _context.Users.FindAsync(id);
     }
 
     public IQueryable<User> GetAll()
     {
-        throw new NotImplementedException();
+        return _context.Users;
     }
 
     public Task<IQueryable<User>> GetManyAsync()
     {
-        throw new NotImplementedException();
+        return Task.FromResult(_context.Users.AsQueryable());
     }
 
     public Task<User> GetUserByUsernameAsync(string requestUserName)

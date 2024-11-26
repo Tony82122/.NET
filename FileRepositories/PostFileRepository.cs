@@ -16,7 +16,7 @@ public class PostFileRepository : IPostRepo
         }
     }
 
-    public async Task<Post> AddAsync(Post post)
+    public async Task<int> AddAsync(Post post)
     {
         string postsAsJson = await File.ReadAllTextAsync(filePath);
         List<Post> posts = JsonSerializer.Deserialize<List<Post>>(postsAsJson)!;
@@ -25,7 +25,7 @@ public class PostFileRepository : IPostRepo
         posts.Add(post);
         postsAsJson = JsonSerializer.Serialize(posts);
         await File.WriteAllTextAsync(filePath, postsAsJson);
-        return post;
+        return post.Id;
     }
 
     public async Task UpdateAsync(Post post)

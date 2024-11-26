@@ -3,35 +3,51 @@ using EntityRepository;
 
 namespace EfcRepositories;
 
-public class EfcPostRepository : IPostRepo
-{
-    public Task<Post> AddAsync(Post post)
+public class EfcPostRepository : IPostRepo{
+    private readonly AppContext _context;
+    
+    public EfcPostRepository(AppContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
     }
 
-    public Task UpdateAsync(Post post)
+
+
+    public Task<int> AddAsync(Post post)
     {
-        throw new NotImplementedException();
+        _context.Posts.Add(post);
+        return _context.SaveChangesAsync();
+        
     }
 
-    public Task DeleteAsync(int id)
+    public async Task UpdateAsync(Post post)
     {
-        throw new NotImplementedException();
+        _context.Posts.Update(post);
+        _context.SaveChangesAsync();
     }
 
-    public Task<Post> GetSingleAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var post = await _context.Posts.FindAsync(id);
+        if (post!= null)
+        {
+            _context.Posts.Remove(post);
+            await _context.SaveChangesAsync();
+        }
+    }
+
+    public async Task<Post> GetSingleAsync(int id)
+    {
+        return await _context.Posts.FindAsync(id) ?? throw new ArgumentException("Post not found", nameof(id));
     }
 
     public IQueryable<Post> GetAll()
     {
-        throw new NotImplementedException();
+        return _context.Posts;
     }
 
     public IEnumerable<Post> GetManyAsync()
     {
-        throw new NotImplementedException();
+        return _context.Posts.ToList();
     }
 }

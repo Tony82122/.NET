@@ -5,38 +5,53 @@ namespace EfcRepositories;
 
 public class EfcCommentRepository : ICommentRepository
 {
-    public Task<Comment> AddAsync(Comment comment)
+    private readonly AppContext _context;
+    public EfcCommentRepository(AppContext context)
     {
-        throw new NotImplementedException();
+        _context = context;
+    }
+    public async Task<Comment> AddAsync(Comment comment)
+    {
+        _context.Comments.Add(comment);
+        await _context.SaveChangesAsync();
+        return  comment;
+        
     }
 
     public Task UpdateAsync(Comment comment)
     {
-        throw new NotImplementedException();
+        _context.Comments.Update(comment);
+        return _context.SaveChangesAsync();
     }
 
-    public Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
-        throw new NotImplementedException();
+        var commentToDelete = await _context.Comments.FindAsync(id);
+        if (commentToDelete != null)
+        {
+            _context.Comments.Remove(commentToDelete);
+            await _context.SaveChangesAsync();
+        }
     }
 
-    public Task<Comment> GetSingleAsync(int id)
-    {
-        throw new NotImplementedException();
+    public async Task<Comment> GetSingleAsync(int id)
+    { 
+        return await _context.Comments.FindAsync(id);
+        
+    
     }
 
     public IQueryable<Comment> GetMany()
     {
-        throw new NotImplementedException();
+        return _context.Comments;
     }
 
     public IQueryable<Comment> GetAll()
     {
-        throw new NotImplementedException();
+        return _context.Comments;
     }
 
     public IQueryable<Comment> GetManyAsync(int userId)
     {
-        throw new NotImplementedException();
-    }
+return _context.Comments.Where(c => c.UserId == userId);    }
 }
