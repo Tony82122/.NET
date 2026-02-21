@@ -1,31 +1,68 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">BlazorApp1</a>
+﻿@using BlazorApp1.HttpEntities
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IAuthProvider AuthProvider
+@inject NavigationManager NavManager
+
+<div class="reddit-sidebar">
+    <div class="reddit-header">
+        <div class="reddit-logo">🔥 r/Forum</div>
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler"/>
+    <nav class="reddit-nav">
+        <AuthorizeView>
+            <Authorized>
+                <div class="user-section">
+                    <div class="user-info">
+                        <div class="user-name">@context.User.Identity?.Name</div>
+                        <button class="logout-btn" @onclick="HandleLogout">Logout</button>
+                    </div>
+                </div>
+            </Authorized>
+            <NotAuthorized>
+                <div class="auth-buttons">
+                    <NavLink href="login" class="btn-auth-nav">Login</NavLink>
+                </div>
+            </NotAuthorized>
+        </AuthorizeView>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+        <div class="nav-divider"></div>
+
+        <div class="nav-section">
+            <div class="nav-title">Navigation</div>
+            <NavLink href="/" class="nav-link" Match="NavLinkMatch.All">
+                <span class="nav-icon">🏠</span>
+                <span>Home</span>
+            </NavLink>
+            <NavLink href="Posts" class="nav-link">
+                <span class="nav-icon">📰</span>
+                <span>Posts</span>
             </NavLink>
         </div>
 
-      
+        <div class="nav-divider"></div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Login">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Login/Sign up
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="Posts">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Posts
-            </NavLink>
+        <div class="nav-section">
+            <div class="nav-title">Community</div>
+            <div class="community-item">
+                <span class="nav-icon">⭐</span>
+                <span>Hot</span>
+            </div>
+            <div class="community-item">
+                <span class="nav-icon">📈</span>
+                <span>Trending</span>
+            </div>
+            <div class="community-item">
+                <span class="nav-icon">✨</span>
+                <span>New</span>
+            </div>
         </div>
     </nav>
 </div>
+
+@code {
+    private async Task HandleLogout()
+    {
+        await AuthProvider.Logout();
+        NavManager.NavigateTo("/login", forceLoad: true);
+    }
+}

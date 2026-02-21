@@ -77,18 +77,18 @@ public class AuthProvider : AuthenticationStateProvider, IAuthProvider
         }
     }
 
-    private async Task<AuthenticationState> CreateAuthenticationStateAsync(UserDto userDto)
+    private Task<AuthenticationState> CreateAuthenticationStateAsync(UserDto userDto)
     {
         var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.Name, userDto.UserName),
+            new Claim(ClaimTypes.Name, userDto.UserName ?? string.Empty),
             new Claim(ClaimTypes.NameIdentifier, userDto.Id.ToString()),
         };
 
         var identity = new ClaimsIdentity(claims, "apiauth");
         var user = new ClaimsPrincipal(identity);
 
-        return new AuthenticationState(user);
+        return Task.FromResult(new AuthenticationState(user));
     }
 
     public Task<AuthenticationState> GetAuthorizationStateAsync()

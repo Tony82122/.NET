@@ -6,70 +6,269 @@
 @inject NavigationManager NavManager
 @inject AuthenticationStateProvider AuthStateProvider
 
-<PageTitle>Trending Posts</PageTitle>
+<PageTitle>r/Forum - Trending</PageTitle>
 
-@if (_loading)
-{
-    <p>Loading...</p>
-}
-else if (!_isAuthenticated)
-{
-    <p>You need to log in to view posts!</p>
-    <button class="btn btn-primary" @onclick="NavigateToLogin">Go to Login</button>
-}
-else
-{
-    <h1>Trending Posts</h1>
-
-    @if (_posts == null || !_posts.Any())
+<div class="posts-container">
+    @if (_loading)
     {
-        <p>No posts found.</p>
+        <div class="loading-state">
+            <p>Loading trending posts...</p>
+        </div>
+    }
+    else if (!_isAuthenticated)
+    {
+        <div class="auth-required">
+            <div class="auth-card">
+                <h2>Sign in to view posts</h2>
+                <p>Join the conversation in r/Forum</p>
+                <button class="btn btn-primary" @onclick="NavigateToLogin">Go to Login</button>
+            </div>
+        </div>
     }
     else
     {
-        <div class="row">
-            @foreach (var post in _posts)
-            {
-                <div class="col-md-6 mb-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">@post.Title</h5>
-                            <p class="card-text">@post.Content</p>
-                            <p class="card-text"><small class="text-muted">Created at: @post.CreatedAt.ToString("g")</small></p>
-                            <p class="card-text">
-                                <span class="badge bg-success">Upvotes: @post.UpVotes</span>
-                                <span class="badge bg-danger">Downvotes: @post.DownVotes</span>
-                            </p>
-                            <p class="card-text"><small class="text-muted">User ID: @post.UserId</small></p>
-                            @if (post.Comments != null && post.Comments.Any())
+        <div class="posts-header">
+            <h1>🔥 Trending in r/Forum</h1>
+        </div>
+
+        @if (_posts == null || !_posts.Any())
+        {
+            <div class="no-posts">
+                <p>No posts found. Be the first to post!</p>
+            </div>
+        }
+        else
+        {
+            <div class="posts-grid">
+                @foreach (var post in _posts)
+                {
+                    <div class="post-item">
+                        <div class="post-header">
+                            <h3 class="post-title">@post.Title</h3>
+                            <span class="post-meta">@FormatDate(post.CreatedAt)</span>
+                        </div>
+
+                        <div class="post-body">
+                            @if (!string.IsNullOrEmpty(post.Body))
                             {
-                                <h6>Comments:</h6>
-                                <ul class="list-group list-group-flush">
-                                    @foreach (var comment in post.Comments.Take(3))
-                                    {
-                                        <li class="list-group-item">
-                                            <p>@comment.TextContent</p>
-                                            <small class="text-muted">By User: @comment.UserId at @comment.CreatedAt.ToString("g")</small>
-                                        </li>
-                                    }
-                                </ul>
-                                @if (post.Comments.Count > 3)
-                                {
-                                    <p class="mt-2"><small>And @(post.Comments.Count - 3) more comments...</small></p>
-                                }
+                                <p>@post.Body</p>
+                            }
+                            @if (!string.IsNullOrEmpty(post.Content))
+                            {
+                                <p>@post.Content</p>
                             }
                         </div>
+
+                        <div class="post-interactions">
+                            <div class="vote-section">
+                                <span class="vote-count">
+                                    ⬆️ @(post.UpVotes ?? 0) / ⬇️ @(post.DownVotes ?? 0)
+                                </span>
+                            </div>
+                            <div class="comment-count">
+                                💬 @(post.Comments?.Count ?? 0) Comments
+                            </div>
+                        </div>
+
+                        @if (post.Comments != null && post.Comments.Any())
+                        {
+                            <div class="comments-section">
+                                <div class="comments-header">Top Comments:</div>
+                                @foreach (var comment in post.Comments.Take(3))
+                                {
+                                    <div class="comment-item">
+                                        <div class="comment-author">@comment.UserId</div>
+                                        <div class="comment-text">@comment.TextContent</div>
+                                        <div class="comment-time">@FormatDate(comment.CreatedAt)</div>
+                                    </div>
+                                }
+                                @if (post.Comments.Count > 3)
+                                {
+                                    <div class="more-comments">
+                                        View @(post.Comments.Count - 3) more comments...
+                                    </div>
+                                }
+                            </div>
+                        }
                     </div>
-                </div>
-            }
-        </div>
+                }
+            </div>
+        }
     }
-}
+</div>
+
+<style>
+    .posts-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .loading-state, .auth-required, .no-posts {
+        text-align: center;
+        padding: 40px;
+        color: #818384;
+    }
+
+    .auth-card {
+        background-color: #1a1a1b;
+        border: 1px solid #343536;
+        border-radius: 8px;
+        padding: 40px;
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .auth-card h2 {
+        margin-bottom: 12px;
+    }
+
+    .auth-card p {
+        color: #818384;
+        margin-bottom: 24px;
+    }
+
+    .posts-header {
+        margin-bottom: 24px;
+    }
+
+    .posts-header h1 {
+        margin: 0;
+        font-size: 28px;
+    }
+
+    .posts-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .post-item {
+        background-color: #1a1a1b;
+        border: 1px solid #343536;
+        border-radius: 4px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+
+    .post-item:hover {
+        border-color: #818384;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+        gap: 12px;
+    }
+
+    .post-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #d7dadc;
+        flex: 1;
+    }
+
+    .post-meta {
+        color: #818384;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+    .post-body {
+        color: #d7dadc;
+        margin: 12px 0;
+        line-height: 1.6;
+        font-size: 14px;
+    }
+
+    .post-body p {
+        margin: 0 0 8px 0;
+    }
+
+    .post-interactions {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-top: 1px solid #343536;
+        border-bottom: 1px solid #343536;
+        margin: 12px 0;
+        font-size: 13px;
+    }
+
+    .vote-section {
+        display: flex;
+        gap: 16px;
+    }
+
+    .vote-count, .comment-count {
+        color: #818384;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .vote-count:hover, .comment-count:hover {
+        color: #d7dadc;
+    }
+
+    .comments-section {
+        margin-top: 12px;
+        padding: 12px;
+        background-color: #272729;
+        border-radius: 4px;
+    }
+
+    .comments-header {
+        font-size: 12px;
+        font-weight: 600;
+        color: #818384;
+        margin-bottom: 12px;
+    }
+
+    .comment-item {
+        padding: 8px;
+        margin-bottom: 8px;
+        border-left: 2px solid #818384;
+        padding-left: 12px;
+    }
+
+    .comment-author {
+        font-weight: 600;
+        font-size: 12px;
+        color: #d7dadc;
+    }
+
+    .comment-text {
+        font-size: 12px;
+        color: #d7dadc;
+        margin: 4px 0;
+    }
+
+    .comment-time {
+        font-size: 11px;
+        color: #818384;
+    }
+
+    .more-comments {
+        font-size: 12px;
+        color: #818384;
+        padding: 8px;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .more-comments:hover {
+        color: #d7dadc;
+    }
+</style>
 
 @code {
-    private List<postDTO> _posts;
+    private List<postDTO>? _posts;
     private bool _loading = true;
-    private bool _isAuthenticated = false;
+    private bool _isAuthenticated;
 
     protected override async Task OnInitializedAsync()
     {
@@ -91,7 +290,7 @@ else
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
-        _isAuthenticated = user.Identity.IsAuthenticated;
+        _isAuthenticated = user.Identity?.IsAuthenticated == true;
 
         if (_isAuthenticated)
         {
@@ -123,5 +322,15 @@ else
     private void NavigateToLogin()
     {
         NavManager.NavigateTo("/login");
+    }
+
+    private string FormatDate(DateTime date)
+    {
+        var diff = DateTime.UtcNow - date;
+        if (diff.TotalMinutes < 1) return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return date.ToString("MMM dd");
     }
 }

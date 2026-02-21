@@ -7,39 +7,303 @@
 @inject NavigationManager NavMgr
 @inject IAuthProvider AuthProvider
 
-<PageTitle>Home</PageTitle>
-
-<h1>Some sort of Reddit App</h1>
+<PageTitle>r/Forum - Home</PageTitle>
 
 <AuthorizeView>
     <Authorized>
-       
-        <button @onclick="Logout">Logout</button>
-        
-        @if (posts != null && posts.Any())
-        {
-            <h2>Posts</h2>
-            @foreach (var post in posts)
+        <div class="home-container">
+            <div class="feed-header">
+                <h1>🔥 r/Forum</h1>
+                <p>Your community, your posts</p>
+            </div>
+
+            @if (posts == null)
             {
-                <div class="post">
-                    <h3>@post.Title</h3>
-                    <p>@post.Body</p>
-                    <!-- Add more post details as needed -->
+                <div class="loading">
+                    <p>Loading posts...</p>
                 </div>
             }
-        }
-        else
-        {
-            <p>Loading posts...</p>
-        }
+            else if (!posts.Any())
+            {
+                <div class="no-posts">
+                    <p>No posts yet. Be the first to post!</p>
+                    <button class="btn btn-primary" @onclick="NavigateToCreate">Create Post</button>
+                </div>
+            }
+            else
+            {
+                <div class="posts-feed">
+                    @foreach (var post in posts)
+                    {
+                        <div class="post-card">
+                            <div class="post-header">
+                                <h3 class="post-title">@post.Title</h3>
+                                <span class="post-date">@FormatDate(post.CreatedAt)</span>
+                            </div>
+
+                            @if (!string.IsNullOrEmpty(post.Body))
+                            {
+                                <div class="post-content">
+                                    @post.Body
+                                </div>
+                            }
+                            
+                            @if (!string.IsNullOrEmpty(post.Content))
+                            {
+                                <div class="post-content">
+                                    @post.Content
+                                </div>
+                            }
+
+                            <div class="post-footer">
+                                <div class="post-stats">
+                                    <span class="upvotes">⬆️ @(post.UpVotes ?? 0)</span>
+                                    <span class="downvotes">⬇️ @(post.DownVotes ?? 0)</span>
+                                    <span class="comments">💬 @(post.Comments?.Count ?? 0)</span>
+                                </div>
+                                <div class="post-actions">
+                                    <button class="action-btn">Share</button>
+                                    <button class="action-btn">Save</button>
+                                </div>
+                            </div>
+
+                            @if (post.Comments != null && post.Comments.Any())
+                            {
+                                <div class="post-comments-preview">
+                                    <div class="comments-label">Top Comments:</div>
+                                    @foreach (var comment in post.Comments.Take(2))
+                                    {
+                                        <div class="comment-preview">
+                                            <strong>@comment.UserId</strong>
+                                            <p>@comment.TextContent</p>
+                                            <small>@FormatDate(comment.CreatedAt)</small>
+                                        </div>
+                                    }
+                                    @if (post.Comments.Count > 2)
+                                    {
+                                        <div class="view-more">View @(post.Comments.Count - 2) more comments</div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
     </Authorized>
     <NotAuthorized>
-        <p>You need to log in to view posts fam!</p>
-        <button @onclick='() => NavMgr.NavigateTo("/login")'>Go to login</button>
+        <div class="login-prompt">
+            <div class="prompt-card">
+                <h2>Join the Community</h2>
+                <p>Sign in to access r/Forum and start posting!</p>
+                <button class="btn btn-primary" @onclick="NavigateToLogin">Go to Login</button>
+            </div>
+        </div>
     </NotAuthorized>
 </AuthorizeView>
+
+<style>
+    .home-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .feed-header {
+        margin-bottom: 30px;
+    }
+
+    .feed-header h1 {
+        margin: 0;
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+
+    .feed-header p {
+        color: #818384;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .posts-feed {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .post-card {
+        background-color: #1a1a1b;
+        border: 1px solid #343536;
+        border-radius: 4px;
+        padding: 16px;
+        transition: all 0.2s;
+    }
+
+    .post-card:hover {
+        border-color: #818384;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .post-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+
+    .post-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        flex: 1;
+        color: #d7dadc;
+    }
+
+    .post-date {
+        color: #818384;
+        font-size: 12px;
+        white-space: nowrap;
+        margin-left: 12px;
+    }
+
+    .post-content {
+        color: #d7dadc;
+        margin-bottom: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .post-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #343536;
+    }
+
+    .post-stats {
+        display: flex;
+        gap: 16px;
+        font-size: 13px;
+    }
+
+    .upvotes, .downvotes, .comments {
+        color: #818384;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .upvotes:hover, .downvotes:hover, .comments:hover {
+        color: #d7dadc;
+    }
+
+    .post-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        color: #818384;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        padding: 0;
+        transition: color 0.2s;
+    }
+
+    .action-btn:hover {
+        color: #d7dadc;
+    }
+
+    .post-comments-preview {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #343536;
+    }
+
+    .comments-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #818384;
+        margin-bottom: 8px;
+    }
+
+    .comment-preview {
+        padding: 8px 0;
+        border-left: 2px solid #343536;
+        padding-left: 12px;
+        margin-bottom: 8px;
+    }
+
+    .comment-preview strong {
+        color: #d7dadc;
+        font-size: 12px;
+    }
+
+    .comment-preview p {
+        margin: 4px 0;
+        font-size: 12px;
+        color: #818384;
+    }
+
+    .comment-preview small {
+        font-size: 11px;
+        color: #565854;
+    }
+
+    .view-more {
+        font-size: 12px;
+        color: #818384;
+        padding: 8px 0;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .view-more:hover {
+        color: #d7dadc;
+    }
+
+    .loading, .no-posts {
+        text-align: center;
+        padding: 40px;
+        color: #818384;
+    }
+
+    .no-posts .btn {
+        margin-top: 16px;
+    }
+
+    .login-prompt {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+    }
+
+    .prompt-card {
+        background-color: #1a1a1b;
+        border: 1px solid #343536;
+        border-radius: 8px;
+        padding: 40px;
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .prompt-card h2 {
+        margin-bottom: 12px;
+    }
+
+    .prompt-card p {
+        color: #818384;
+        margin-bottom: 24px;
+    }
+</style>
+
 @code {
-    private List<postDTO> posts;
+    private List<postDTO>? posts;
 
     protected override async Task OnInitializedAsync()
     {
@@ -53,7 +317,7 @@
             var authState = await AuthProvider.GetAuthenticationStateAsync();
             var user = authState.User;
 
-            if (user.Identity.IsAuthenticated)
+            if (user.Identity?.IsAuthenticated == true)
             {
                 posts = await PostService.GetPostsAsync();
             }
@@ -69,9 +333,23 @@
         }
     }
 
-    private async Task Logout()
+    private void NavigateToLogin()
     {
-        await AuthProvider.Logout();
         NavMgr.NavigateTo("/login");
+    }
+
+    private void NavigateToCreate()
+    {
+        NavMgr.NavigateTo("/create-post");
+    }
+
+    private string FormatDate(DateTime date)
+    {
+        var diff = DateTime.UtcNow - date;
+        if (diff.TotalMinutes < 1) return "just now";
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m ago";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h ago";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d ago";
+        return date.ToString("MMM dd");
     }
 }

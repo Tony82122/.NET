@@ -2,11 +2,15 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <p>Sorry, you're not authorized to view this page.</p>
-                <p>Please <a href="login">log in</a> or <a href="register">register</a>.</p>
+                <div style="text-align: center; padding: 40px; color: #818384;">
+                    <p style="font-size: 16px;">You need to be logged in to access this.</p>
+                    <p>Please <a href="/login" style="color: #818384; text-decoration: underline;">log in</a> to continue.</p>
+                </div>
             </NotAuthorized>
             <Authorizing>
-                <p>Authorization in progress...</p>
+                <div style="text-align: center; padding: 40px; color: #818384;">
+                    <p>Checking authorization...</p>
+                </div>
             </Authorizing>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
@@ -14,7 +18,11 @@
     <NotFound>
         <PageTitle>Not found</PageTitle>
         <LayoutView Layout="typeof(Layout.MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
+            <div style="text-align: center; padding: 40px; color: #818384;">
+                <h1 style="color: #d7dadc; margin-bottom: 12px;">404</h1>
+                <p role="alert">Sorry, there's nothing at this address.</p>
+                <a href="/" style="color: #818384; text-decoration: underline;">Go back home</a>
+            </div>
         </LayoutView>
     </NotFound>
 </Router>

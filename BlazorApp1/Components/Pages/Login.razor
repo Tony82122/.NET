@@ -4,54 +4,188 @@
 @inject IAuthProvider AuthProvider
 @inject NavigationManager NavManager
 
-<PageTitle>Login</PageTitle>
+<PageTitle>r/Forum - Login</PageTitle>
 
-<h1>Login</h1>
+<div class="login-container">
+    <div class="login-box">
+        <div class="login-header">
+            <h1>🔥 r/Forum</h1>
+            <p>Join the Community</p>
+        </div>
 
-<div class="form-group">
-    <label for="username">Username:</label>
-    <input type="text" class="form-control" id="username" @bind="username"/>
+        <form @onsubmit="LoginAsync">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" @bind="_username" placeholder="Enter your username" required/>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" @bind="_password" placeholder="Enter your password" required/>
+            </div>
+
+            @if (!string.IsNullOrEmpty(_message))
+            {
+                <div class="message @_messageClass">@_message</div>
+            }
+
+            <button type="submit" class="btn btn-primary btn-login">LOGIN</button>
+        </form>
+
+        <div class="login-footer">
+            <p>Welcome to r/Forum</p>
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="password">Password:</label>
-    <input type="password" class="form-control" id="password" @bind="password"/>
-</div>
+<style>
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+    }
 
-<button class="btn btn-primary" @onclick="LoginAsync">LOGIN</button>
+    .login-box {
+        background-color: #1a1a1b;
+        border: 1px solid #343536;
+        border-radius: 8px;
+        padding: 40px;
+        width: 100%;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
 
-@if (!string.IsNullOrEmpty(message))
-{
-    <p class="mt-3 @messageClass">@message</p>
-}
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .login-header h1 {
+        margin: 0 0 12px 0;
+        font-size: 32px;
+        color: #d7dadc;
+    }
+
+    .login-header p {
+        margin: 0;
+        color: #818384;
+        font-size: 14px;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 14px;
+        color: #d7dadc;
+    }
+
+    .form-control {
+        padding: 12px;
+        border: 1px solid #343536;
+        border-radius: 4px;
+        background-color: #272729;
+        color: #d7dadc;
+        font-size: 14px;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #818384;
+        background-color: #1a1a1b;
+    }
+
+    .form-control::placeholder {
+        color: #818384;
+    }
+
+    .message {
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        background-color: rgba(220, 53, 69, 0.2);
+        color: #dc3545;
+        border: 1px solid rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-login {
+        padding: 12px;
+        font-weight: 600;
+        font-size: 16px;
+        border-radius: 20px;
+        transition: all 0.2s;
+    }
+
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .login-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 1px solid #343536;
+    }
+
+    .login-footer p {
+        margin: 0;
+        color: #818384;
+        font-size: 14px;
+    }
+
+    .login-footer a {
+        color: #818384;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    .login-footer a:hover {
+        color: #d7dadc;
+    }
+</style>
 
 @code {
-    private string username = "";
-    private string password = "";
-    private string message = "";
-    private string messageClass = "";
+    private string _username = "";
+    private string _password = "";
+    private string _message = "";
+    private string _messageClass = "";
 
     private async Task LoginAsync()
     {
         try
         {
-            await AuthProvider.LoginAsync(username, password);
+            await AuthProvider.LoginAsync(_username, _password);
             var authState = await AuthProvider.GetAuthenticationStateAsync();
-            if (authState.User.Identity.IsAuthenticated)
+            if (authState.User.Identity?.IsAuthenticated == true)
             {
-                NavManager.NavigateTo("/posts", forceLoad: true); // Ensuring the entire app is aware of the state change
+                NavManager.NavigateTo("/", forceLoad: true);
             }
             else
             {
-                message = "Failed. Please try again.";
-                messageClass = "text-danger";
+                _message = "Failed. Please try again.";
+                _messageClass = "text-danger";
             }
         }
         catch (Exception ex)
         {
-            message = $"Login failed: {ex.Message}";
-            messageClass = "text-danger";
+            _message = $"Login failed: {ex.Message}";
+            _messageClass = "text-danger";
         }
     }
-    
 }
