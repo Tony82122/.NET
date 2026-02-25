@@ -12,8 +12,8 @@ public class AuthProvider : AuthenticationStateProvider, IAuthProvider
 {
     private readonly HttpClient httpClient;
     private readonly IJSRuntime jsRuntime;
-    private const string DummyUsername = "Hello";
-    private const string DummyPassword = "Moto";
+    private const string DummyUsername = "user";
+    private const string DummyPassword = "1234";
     private const string StorageKey = "currentUser";
 
     private AuthenticationState? _cachedAuthState;
